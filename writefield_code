@@ -1,0 +1,61 @@
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WiFiServer.h>
+#include <WiFiUdp.h>
+
+#include "ThingSpeak.h"
+//#include <ESP8266WiFi.h>
+
+//Replace your wifi credentials here
+const char* ssid     = "leap robots";//Replace with your Wifi Name
+const char* password = "8574045045";// Replace with your wifi Password
+
+//change your channel number here
+unsigned long channel =896328;//Replace with your own ThingSpeak Account Channle ID
+const char * myWriteAPIKey = "G0VQ8SVIP2KYLXRN"; 
+//1,2 and 3 are channel fields. You don't need to change if you are following this tutorial. However, you can modify it according to your application
+#define pot_p 2
+int val;
+
+WiFiClient  client;
+
+
+void setup() {
+  Serial.begin(115200);
+  delay(100);
+  
+  pinMode(pot_p, INPUT);
+  // We start by connecting to a WiFi network
+ 
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  
+  WiFi.begin(ssid, password);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+ 
+  Serial.println("");
+  Serial.println("WiFi connected");  
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+  Serial.print("Netmask: ");
+  Serial.println(WiFi.subnetMask());
+  Serial.print("Gateway: ");
+  Serial.println(WiFi.gatewayIP());
+  ThingSpeak.begin(client);
+
+}
+
+void loop() {
+ val=analogRead(pot_p);
+ Serial.println("pot value: "+String(val));
+  //get the last data of the fields
+  ThingSpeak.setField(1, (float)val);
+  ThingSpeak.writeFields(channel, myWriteAPIKey);
+  delay(5000);
+}
